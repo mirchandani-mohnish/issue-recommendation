@@ -8,20 +8,20 @@
 import requests
 import utils.helper_methods as helper_methods
 
-def getIssues(org):
+def getUsers(org):
     helper_methods.whereAmI()
-    issues = []
+    members = []
     headers = helper_methods.seekHeaders()
-    orgUrl = 'https://api.github.com/orgs/'+org+'/issues'
+    orgUrl = 'https://api.github.com/orgs/'+org+'/members'
     pageNo = 1
     while(True):
-        issueResponse = requests.get(orgUrl+'?page='+str(pageNo), headers=headers)
-        issueResponse=issueResponse.json()
-        if(len(issueResponse) == 0):
+        memberResponse = requests.get(orgUrl+'?page='+str(pageNo), headers=headers)
+        memberResponse=memberResponse.json()
+        if(len(memberResponse) == 0):
             break
         pageNo = pageNo+1
-        for issue in issueResponse:
-            issues.append(issue)
-    return issues
+        for member in memberResponse:
+            members.append(member['login'])
+    return members
 
 # print(getUsers('yahoo'))
