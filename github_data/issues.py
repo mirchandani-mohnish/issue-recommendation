@@ -25,11 +25,18 @@ def getIssues(repo):
         for issue in issueResponse:
             issues.append(issue)
         print(issueResponse)
-        json_object = json.dumps(issueResponse, indent=4)
+        # json_object = json.dumps(issueResponse, indent=4)
  
         # Writing to sample.json
+        with open("./data/issues.json", "r") as infile:
+            json_data = json.load(infile)
+
+
+        json_data.append(issues)
+
         with open("./data/issues.json", "w") as outfile:
-            outfile.append(json_object)
+            json.dump(json_data, outfile)
+        
         time.sleep(0.1)
 
     return issues
