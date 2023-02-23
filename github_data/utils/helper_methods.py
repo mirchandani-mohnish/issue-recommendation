@@ -28,6 +28,15 @@ def getRepoList():
         filteredRepoList.append(repoName[1])
     
     return filteredRepoList
+
+def logCurrentRepo(repo, repoCount):
+    with open("data/logs.json", "a") as outfile:
+        outfile.write(str(repoCount))
+        outfile.write("/t")
+        outfile.write(repo)
+        outfile.write("/n")
+    print(str(repoCount) + " " + repo)
+    
     
 
 

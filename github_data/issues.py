@@ -24,18 +24,16 @@ def getIssues(repo):
         pageNo = pageNo+1
         for issue in issueResponse:
             issues.append(issue)
-        print(issueResponse)
-        # json_object = json.dumps(issueResponse, indent=4)
+
+        json_object = json.dumps(issueResponse, indent=4)
+        with open("data/issues.json", "a") as outfile:
+            outfile.write(json_object)
  
         # Writing to sample.json
-        with open("./data/issues.json", "r") as infile:
-            json_data = json.load(infile)
-
-
-        json_data.append(issues)
-
-        with open("./data/issues.json", "w") as outfile:
-            json.dump(json_data, outfile)
+        # with open("./data/issues.json", "r+") as outfile:
+        #     json_data = json.loads(outfile.read())
+        #     json_data.append(issues)
+        #     json.dump(json_data, outfile)
         
         time.sleep(0.1)
 
