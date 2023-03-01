@@ -1,6 +1,7 @@
 
 import pandas as pd
-
+import sys
+sys.path.append('../')
 
 def whereAmI():
     print()
@@ -21,7 +22,7 @@ def getToken():
 
 
 def getRepoList():
-    rawRepoList = pd.read_csv(r'data/repos.csv')
+    rawRepoList = pd.read_csv(r'../data/input/repos.csv')
     filteredRepoList = []
     for row in rawRepoList['repo_url']:
         repoName = row.split("https://github.com/")
@@ -29,8 +30,19 @@ def getRepoList():
     
     return filteredRepoList
 
+
+def getOrgList():
+    rawRepoList = pd.read_csv(r'../data/input/repos.csv')
+    filteredRepoList = []
+    for row in rawRepoList['repo_url']:
+        repoName = row.split("https://github.com/")
+        repoName = repoName[1].split("/")
+        filteredRepoList.append(repoName[0])
+        print(repoName[1])
+    # return filteredRepoList
+
 def logCurrentRepo(repo, repoCount):
-    with open("data/logs.json", "a") as outfile:
+    with open("../data/logs/repologs.json", "a") as outfile:
         outfile.write(str(repoCount))
         outfile.write("/t")
         outfile.write(repo)
@@ -38,7 +50,9 @@ def logCurrentRepo(repo, repoCount):
     print(str(repoCount) + " " + repo)
     
     
+def logData(logVal):
+    with open("../data/logs/logs.json", "a") as outfile:
+        outfile.write(str(logVal))
+        outfile.write("\n")
+    print(logVal)
 
-
-
-getRepoList()

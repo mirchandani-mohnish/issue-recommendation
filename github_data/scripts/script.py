@@ -1,7 +1,8 @@
 import requests
 import json
 import time
-
+import sys
+sys.path.append('../')
 # Define the repository for which you want to extract issues data
 repo = "lapce/lapce"
 

@@ -8,13 +8,17 @@ import json
 import time
 import requests
 import utils.helper_methods as helper_methods
-
+import queue
+import users as users
+import sys
+sys.path.append('../')
 def getIssues(repo):
-    helper_methods.whereAmI()
+    helper_methods.logData("getIssues called")
     issues = []
     # headers = helper_methods.seekHeaders()
     headers = {"Authorization": "Bearer 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"}
     orgUrl = 'https://api.github.com/repos/'+repo+'/issues'
+    helper_methods.logData(f"Issues from current repo: {orgUrl}")
     pageNo = 1
     while(True):
         issueResponse = requests.get(orgUrl+'?page='+str(pageNo), headers=headers)
@@ -24,7 +28,7 @@ def getIssues(repo):
         pageNo = pageNo+1
         for issue in issueResponse:
             issues.append(issue)
-
+        helper_methods.logData(f"IssuePageNumber: {pageNo}")
         json_object = json.dumps(issueResponse, indent=4)
         with open("data/issues.json", "a") as outfile:
             outfile.write(json_object)
@@ -68,5 +72,32 @@ def getIssueStruct(org):
 
 
 
+def fetchIssueData():
+    repoList = helper_methods.getRepoList()
+    repoCount = 0
+    for repo in repoList:
+        issues.getIssues(repo)
+        repoCount += 1
+        helper_methods.logCurrentRepo(repo, repoCount)
+        # print(repo)
+
+        time.sleep(0.5)
+
+
+
+def fetchUserData():
+    userList = helper_methods.getUserList()
+    userCount = 0
+    userFetchLevel = 5
+    user_queue = queue.Queue()
+    for val in userList:
+        currentlevel = 0
+        while user_queue.empty() == False:
+            user = user_queue.get()
+            users.getUserInfo(user)
+            users.appendUsersToUserList(user,user_queue, currentlevel, userFetchLevel)
+            userCount += 1
+            
+        user_queue.put(val)
 
 # getIssueStruct('lapce/lapce')
