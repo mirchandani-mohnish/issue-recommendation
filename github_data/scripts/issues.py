@@ -28,7 +28,7 @@ def getIssues(repo):
         pageNo = pageNo+1
         for issue in issueResponse:
             issues.append(issue)
-        helper_methods.logData(f"IssuePageNumber: {pageNo}")
+        helper_methods.logData(f"getIssues: IssuePageNumber: {pageNo}")
         json_object = json.dumps(issueResponse, indent=4)
         with open("data/issues.json", "a") as outfile:
             outfile.write(json_object)
@@ -74,30 +74,15 @@ def getIssueStruct(org):
 
 def fetchIssueData():
     repoList = helper_methods.getRepoList()
+
     repoCount = 0
     for repo in repoList:
-        issues.getIssues(repo)
+        getIssues(repo)
         repoCount += 1
         helper_methods.logCurrentRepo(repo, repoCount)
+        helper_methods.logData(f"fetchIssueData: Fetching Issues -> {repo}")
         # print(repo)
 
         time.sleep(0.5)
 
 
-
-def fetchUserData():
-    userList = helper_methods.getUserList()
-    userCount = 0
-    userFetchLevel = 5
-    user_queue = queue.Queue()
-    for val in userList:
-        currentlevel = 0
-        while user_queue.empty() == False:
-            user = user_queue.get()
-            users.getUserInfo(user)
-            users.appendUsersToUserList(user,user_queue, currentlevel, userFetchLevel)
-            userCount += 1
-            
-        user_queue.put(val)
-
-# getIssueStruct('lapce/lapce')

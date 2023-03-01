@@ -12,16 +12,10 @@ sys.path.append('../')
 
 headers = {"Authorization": "Bearer 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"}
 
-orgList = []
-
-
-
-    
-
 
 
 def getUsers(org):
-    helper_methods.whereAmI()
+    helper_methods.logData(f"User Fetch Called: {org}")
     members = []
     orgUrl = 'https://api.github.com/orgs/'+org+'/members'
     pageNo = 1
@@ -32,10 +26,8 @@ def getUsers(org):
             break
         pageNo = pageNo+1
         for member in memberResponse:
-            members.append(member['login'])
+            members.append(member)
     return members
-
-
 
 def appendUsersToUserList(currUser,appendQueue,level, levelLimit):
     if(level >= levelLimit):
@@ -51,8 +43,6 @@ def appendUsersToUserList(currUser,appendQueue,level, levelLimit):
 
 # print(getUsers('yahoo'))
 
-
-
 def fetchUserData():
     userList = helper_methods.getUserList()
     userCount = 0
@@ -67,3 +57,4 @@ def fetchUserData():
             userCount += 1
             
         user_queue.put(val)
+
