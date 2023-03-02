@@ -2,10 +2,9 @@
 import pandas as pd
 import sys
 import requests
+import time
 sys.path.append('../')
 
-def whereAmI():
-    print()
 
 
 
@@ -21,6 +20,9 @@ def seekHeaders():
 def getToken():
     print("Getting Token")
 
+
+def appendToFile(filePath, data):
+    print()
 
 def getRepoList():
     rawRepoList = pd.read_csv(r'../data/input/repos.csv')
@@ -46,11 +48,18 @@ def getRepoList():
 headers = {"Authorization": "Bearer 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"}
 
 def getOrgList():
-    repoUrl = "https://api.github.com/search/users?q=type:org"
+    repoUrl = 'https://api.github.com/search/users?q=type:org'
     orgData = requests.get(repoUrl, headers=headers)
+    orgData = orgData.json()
+    orgDataFilteredList = []
+    logData("getting organization details from github")
     for org in orgData['items']:
         orgDataFiltered = org['login']
-        print(org['login'])
+        orgDataFilteredList.append(orgDataFiltered)
+
+    with open("../data/raw/orgs.json", "w") as outfile:
+        outfile.write(str(orgDataFilteredList))    
+    return orgDataFilteredList 
     # rawRepoList = pd.read_csv(r'../data/input/repos.csv')
     # logData("generating org list from repos.csv file")
     # filteredRepoList = []
@@ -80,4 +89,4 @@ def logData(logVal):
         outfile.write("\n")
     print(logVal)
 
-getOrgList()
+
