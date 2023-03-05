@@ -48,17 +48,28 @@ def getRepoList():
 headers = {"Authorization": "Bearer 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"}
 
 def getOrgList():
-    repoUrl = 'https://api.github.com/search/users?q=type:org'
-    orgData = requests.get(repoUrl, headers=headers)
-    orgData = orgData.json()
+    repoUrl = 'https://api.github.com/search/users?q=type:org' 
+    pageNo = 1
     orgDataFilteredList = []
     logData("getting organization details from github")
-    for org in orgData['items']:
-        orgDataFiltered = org['login']
-        orgDataFilteredList.append(orgDataFiltered)
-
-    with open("../data/raw/orgs.json", "w") as outfile:
-        outfile.write(str(orgDataFilteredList))    
+    while(True):
+        orgData = requests.get(repoUrl + '?page='+str(pageNo), headers=headers)
+        orgData = orgData.json()
+        logData(repoUrl + '?page='+str(pageNo))
+        if(len(orgData) == 0):
+            break
+        pageNo += 1
+        logData("page no: " + str(pageNo))
+        for org in orgData['items']:
+            orgDataFiltered = org['login']
+            orgDataFilteredList.append(orgDataFiltered)
+            with open("../data/raw/orgs.json", "a") as outfile:
+                outfile.write(str(org['login']))
+                outfile.write("\n") 
+            logData("currentOrg: " + str(org['login']))
+            time.sleep(0.5)
+        
+        
     return orgDataFilteredList 
     # rawRepoList = pd.read_csv(r'../data/input/repos.csv')
     # logData("generating org list from repos.csv file")
@@ -71,7 +82,7 @@ def getOrgList():
     # return filteredRepoList
 
 
-    
+    # 
     # return filteredRepoList
 
 def logCurrentRepo(repo, repoCount):

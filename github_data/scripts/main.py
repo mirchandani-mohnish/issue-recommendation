@@ -7,6 +7,8 @@ import users as users
 import issues as issues
 import datetime
 import json
+import threading
+import pulls as pulls
 
 helper_methods.logData("-----------New Compile---------")
 dt = datetime.date.today()
@@ -21,14 +23,27 @@ def logUsers(userData):
         outfile.write(json_object)
     return
 
-orgList = helper_methods.getOrgList()
-helper_methods.logData("Org List Received")
+def fetchUsersViaOrgs():
+    orgList = []
 
-for org in orgList:
-    print(org)
-    userData = users.getUsers(org)
-    # print(userData)
-    logUsers(userData)
-    time.sleep(1)
+    with open("../data/raw/orgs.json", "r") as infile:
+        for line in infile:
+            line.strip()
+            orgList.append(str(line).strip())
+        
+
+    helper_methods.logData("Done Reading Org List")
+
+    for org in orgList:
+        print(org)
+        userData = users.getUsers(org)
+        print(userData)
+        # logUsers(userData)
+        time.sleep(1)
 
 
+def fetchIssueUsersPulls():
+    pulls.fetchPullData()
+
+
+fetchIssueUsersPulls()

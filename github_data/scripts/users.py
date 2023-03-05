@@ -21,8 +21,10 @@ def getUsers(org):
     pageNo = 1
     while(True):
         memberResponse = requests.get(orgUrl+'?page='+str(pageNo), headers=headers)
+        print(orgUrl+'?page='+str(pageNo))
         memberResponse=memberResponse.json()
-        if(len(memberResponse) == 0):
+        if(len(memberResponse) == 0 or memberResponse['message'] == "Not Found"):
+            print(memberResponse)
             break
         pageNo = pageNo+1
         for member in memberResponse:
