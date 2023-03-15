@@ -9,6 +9,15 @@ import datetime
 import json
 import threading
 import pulls as pulls
+import pandas as pd
+import ijson
+import requests 
+import networkx as nx
+import matplotlib.pyplot as plt
+
+
+headers = {"Authorization": "Bearer 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"}
+
 
 helper_methods.logData("-----------New Compile---------")
 dt = datetime.date.today()
@@ -46,4 +55,25 @@ def fetchIssueUsersPulls():
     pulls.fetchPullData()
 
 
-fetchIssueUsersPulls()
+def connectUserIssues():
+    # with open('../data/raw/pulls.json') as f:
+    #     data = json.load(f)
+    #     # data =  [line for line in f if line.strip()]
+    with open("../data/raw/pulls.json", "rb") as f:
+        for record in ijson.items(f, "item"):
+            # print(record)
+            user = record["head"]["user"]
+            
+            # print(user)
+            issueUrl = record["issue_url"]
+            linkedIssueData = requests.get(str(issueUrl), headers=headers) # one issue 
+            
+            # repo = record["repo"]["name"]
+            # if user not in user_to_repos:
+            #     user_to_repos[user] = set()
+            # user_to_repos[user].add(repo)
+            time.sleep(0.2)
+
+    # print(data[0])
+
+connectUserIssues()

@@ -27,12 +27,12 @@ def getPulls(repo):
     # pageNo = pageNo+1
     for pr in pullsResponse:
         pull_requests.append(pr)
-        linkedIssueData = requests.get(str(pr['issue_url']), headers=headers)
+        linkedIssueData = requests.get(str(pr['issue_url']), headers=headers) # one issue 
         linkedIssueData = linkedIssueData.json()
-        linkedUserData = pr['user']
+        linkedUserData = pr['user'] # one user 
         linked_issues.append(linkedIssueData)
         linked_users.append(linkedUserData)
-    
+
 
     json_object = json.dumps(pullsResponse, indent=4)
     with open("../data/raw/pulls.json", "a") as outfile:
@@ -65,3 +65,4 @@ def fetchPullData():
 
         time.sleep(0.5)
 
+# fetchPullData()
