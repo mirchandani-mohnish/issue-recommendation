@@ -37,4 +37,10 @@ def fetchIssueUsersPulls():
     pulls.fetchPullData()
 
 
-generateGraph.connectUserIssues("../data/raw/pulls.json")
+# generateGraph.connectUserIssues("../data/raw/pulls.json")
+
+
+# making graph and connecting user nodes and issue nodes 
+g = generateGraph.loadGraph("../graphs/graph.gml")
+generateGraph.connectIssues(g)
+

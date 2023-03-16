@@ -15,11 +15,11 @@ import requests
 import networkx as nx
 import matplotlib.pyplot as plt
 import ijson
-
+import os
 from networkx import bipartite
 
 headers = {"Authorization": "Bearer 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"}
-
+path = "/github_data/graphs"
 
 
 
@@ -114,7 +114,17 @@ params:
 
 
 '''
+def loadGraph(fileName):
+    gph = nx.read_gml(fileName)
+    return gph
 
+
+def saveGraph(gph, fileName):
+    nx.write_gml(gph,os.path.join(path,(fileName + '.gml')))
+    nx.write_gexf(gph,os.path.join(path,(fileName + '.gexf')))
+    nx.write_graphml(gph,os.path.join(path,(fileName + '.graphml')))
+    nx.write_edgelist(gph,os.path.join(path,(fileName + '.txt')))
+    
 
 def connectUserIssues(fileName):
     g = nx.Graph()
@@ -131,15 +141,32 @@ def connectUserIssues(fileName):
             issueNodeId = linkedIssueData.json()["node_id"] # make a node id -> issue node id is the node_id provided by github
             # print(linkedIssueData.json())
             userNodeId = userNodeData["login"] # user node id is the login id
-            g.add_node(userNodeId,attr=userNodeData, bipartite = 0) # create the first node of bipartite graph 
-            g.add_node(issueNodeId, attr=issueNodeData, bipartite = 1) # issue node of graph
-            g.add_edge(userNodeId, issueNodeId) # connect both the nodes
-            helper_methods.logData("Connection made:" + userNodeId + " --- "+ issueNodeId )
+            try:
+                g.add_node(userNodeId,attr=userNodeData, bipartite = 0) # create the first node of bipartite graph 
+                g.add_node(issueNodeId, attr=issueNodeData, bipartite = 1) # issue node of graph
+                g.add_edge(userNodeId, issueNodeId) # connect both the nodes
+                helper_methods.logData("Connection made:" + userNodeId + " --- "+ issueNodeId )
+            except:
+                helper_methods.logData("Connection rejected")
+                pass
             # helper_methods.logData("Creating Node between" + json.tostring(user) + "and " json.tostring(issueUrl))
             count += 1
+            print(count)
             if count >= 20:
-                nx.write_gml(g,"../graphs/graph.gml")
-                count = 0
+                try:
+                    nx.write_gml(g,"../graphs/graph.gml")
+                    
+                    count = 0
+                except:
+                    print("unable to write")
+                    pass
+
+                try:
+                    nx.write_gexf(g,"../graphs/graph.gexf")
+                    count = 0
+                except:
+                    print("unable to write")
+                    pass
             # time.sleep(1)
             time.sleep(0.2)
             print(g)
@@ -148,12 +175,57 @@ def connectUserIssues(fileName):
 
 def connectUsers(gph):
     helper_methods.logData("---------Connecting Users---------")
-    helper_methods
+    userToRepo = {}
+    for n in gph.nodes(data=True):
+        if n[1]['bipartite'] == 0:
+            starredUrl = n[1]['attr']['starred_url']
+
+            starredUrl = starredUrl.strip("{/owner}{/repo}")
+            print(starredUrl)
+            listOfStarredRepos = requests.get(starredUrl, headers = headers)
+            listOfStarredRepos = listOfStarredRepos.json()
+        
+            for repo in listOfStarredRepos:
+                if(userToRepo[repo]):
+                    userToRepo[repo].append(n[0])
+                    for us in userToRepo:
+                        nx.set_node_attributes(gph, {}) # dictionary ka locha hai karna hai solve
+                else:
+                    userToRepo[repo] = []
+                    userToRepo[repo].append(n[0])
+            helper_methods.logData("edges made for node" + n[0])   
+        
+        time.sleep(1)
     print("users connected")
 
 
 
 def connectIssues(gph):
+    helper_methods.logData("---------Connecting Issues---------")
+    issueToLang = {}
+    for n in gph.nodes(data=True):
+        if n[1]['bipartite'] == 1:
+            parentRepoUrl = n[1]['attr']['repository_url']
+
+            # parentRepoUrl = parentRepoUrl.strip("{/owner}{/repo}")
+            parentRepoData = requests.get(parentRepoUrl, headers = headers)
+            listOfLanguagesUrl = parentRepoData.json()['languages_url']
+            listOfLanguages = requests.get(listOfLanguagesUrl, headers=headers).json()
+            print(listOfLanguages)
+
+            # ------ graph connections need to be made here ------
+        
+            for lang in listOfLanguages:
+                if(issueToLang[lang]):
+                    issueToLang[lang].append(n[0])
+                    for us in issueToLang:
+                        nx.set_node_attributes(gph, {}) # dictionary ka locha hai karna hai solve
+                else:
+                    issueToLang[lang] = []
+                    issueToLang[lang].append(n[0])
+            helper_methods.logData("edges made for node" + n[0])   
+        
+        time.sleep(1)
     print("Issues connected")
 
 
@@ -162,7 +234,8 @@ def connectIssues(gph):
 
 
 
-
+def generateMetrics(gph): ## tbd -> to generate metrics for different graphs 
+    print(gph)
 
 
 
