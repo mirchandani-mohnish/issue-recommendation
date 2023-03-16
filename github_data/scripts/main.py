@@ -14,6 +14,7 @@ import ijson
 import requests 
 import networkx as nx
 import matplotlib.pyplot as plt
+import generateGraph
 
 
 headers = {"Authorization": "Bearer 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"}
@@ -36,3 +37,4 @@ def fetchIssueUsersPulls():
     pulls.fetchPullData()
 
 
+generateGraph.connectUserIssues("../data/raw/pulls.json")
