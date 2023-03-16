@@ -1,10 +1,3 @@
-'''
-    1) Given an org - give the list of members
-    These are the user nodes in the graph
-
-    call: getUsers(org), returns list of users
-'''
-
 import requests
 import utils.helper_methods as helper_methods
 import sys
@@ -13,7 +6,14 @@ sys.path.append('../')
 headers = {"Authorization": "Bearer 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"}
 
 
+'''
+getUsers()
 
+The get users call gets the users of a single organization
+-> users fetched are stored in a json file
+-> we handle pagination provided by github pages also
+
+'''
 def getUsers(org):
     helper_methods.logData(f"User Fetch Called: {org}")
     members = []
@@ -43,7 +43,13 @@ def appendUsersToUserList(currUser,appendQueue,level, levelLimit):
         level += 1
         return appendQueue
 
-# print(getUsers('yahoo'))
+
+'''
+fetchUserData
+-> fetch user data is a function which provides for fetching user data
+-> it provides a sort of breadth first approach. 
+
+'''
 
 def fetchUserData():
     userList = helper_methods.getUserList()

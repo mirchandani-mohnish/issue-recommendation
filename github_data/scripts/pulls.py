@@ -7,6 +7,14 @@ import users as users
 import sys
 sys.path.append('../')
 
+
+
+'''
+Pull requests in github become the connection bridge between users and issues
+-> pull requests also have issueUrl and user data.
+-> we use both to form graphs
+
+'''
 def getPulls(repo):
     helper_methods.logData("getPulls called")
     pulls = []

@@ -12,6 +12,17 @@ import queue
 import users as users
 import sys
 sys.path.append('../')
+
+
+
+'''
+getIssues function
+-> used to get issues based on call from repository
+-> pass repository as a parameter and will continuously place call to the link
+-> takes care of pagination by running a loop till all issues fetched
+
+
+'''
 def getIssues(repo):
     helper_methods.logData("getIssues called")
     issues = []
@@ -70,6 +81,15 @@ def getIssueStruct(org):
     print("userStruct built")
     return issueStruct
 
+
+
+'''
+fetchIssueData()
+-> function used to fetch all issue data
+-> uses getIssues as a utility
+-> takes the repolist provided in getRepoList function 
+-> repos.csv consists of the popular repositories of 2022
+'''
 
 
 def fetchIssueData():
