@@ -183,7 +183,7 @@ def connectUsers(gph):
     helper_methods.logData("---------Connecting Users---------")
     userToRepo = {}
     temp_dic = {}
-    g = nx.Graph()
+    g = gph
     for n in gph.nodes(data=True):
         if n[1]['bipartite'] == 0:
             starredUrl = n[1]['attr']['starred_url']
@@ -273,23 +273,24 @@ def connectIssues(gph):
             # try:
             helper_methods.logData("connecting Issues: " + n[0])
             listOfLanguages = {}
+            mostUsedLang = None
             try:
                 parentRepoData = requests.get(parentRepoUrl, headers = headers)
                 listOfLanguagesUrl = parentRepoData.json()['languages_url']
                 listOfLanguages = requests.get(listOfLanguagesUrl, headers=headers).json()
-                
+                mostUsedLang = list(listOfLanguages.items())[0][0]
+                print(list(listOfLanguages.items())[0][1]) # getting languages 
             except Exception as e:
                 print(e)
                 helper_methods.logData(e)
                 time.sleep(10)
 
-            mostUsedLang = list(listOfLanguages.items())[0][0]
-            print(list(listOfLanguages.items())[0][1]) # getting languages 
-            if mostUsedLang in issueToLang:
-                issueToLang[mostUsedLang].append(str(n[0]))
-            else:
-                issueToLang[mostUsedLang] = [str(n[0]),]
-            print(n[0])
+            if mostUsedLang != None:
+                if mostUsedLang in issueToLang:
+                    issueToLang[mostUsedLang].append(str(n[0]))
+                else:
+                    issueToLang[mostUsedLang] = [str(n[0]),]
+                print(n[0])
             count += 1
             if( count > 20 ):
                 with open('../data/misc/issuesToLang.json', 'w') as file:
