@@ -28,8 +28,11 @@ def getPulls(repo):
     pulls = []
     linked_issues = []
     linked_users = []
+    accessToken = ""
     # headers = helper_methods.seekHeaders()
-    headers = {"Authorization": "Bearer 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" }
+    with open(fd.helperFile, "r") as file:
+        accessToken = json.load(file)['token']
+    headers = {"Authorization": "Bearer " + accessToken }
 
 
     pullUrl = str('https://api.github.com/repos/' + repo + '/pulls?state=closed')
