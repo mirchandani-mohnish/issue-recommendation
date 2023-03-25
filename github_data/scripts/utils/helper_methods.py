@@ -24,15 +24,17 @@ def getToken():
 def appendToFile(filePath, data):
     print()
 
-def getRepoList():
+def getRepoList(lastRepoCount, lastRepoName):
     rawRepoList = pd.read_csv(r'../data/input/repos.csv')
     filteredRepoList = []
-    for row in rawRepoList['repo_url']:
+    RepoList = rawRepoList.iloc[lastRepoCount: , :]
+    for row in RepoList['repo_url']:
         repoName = row.split("https://github.com/")
         filteredRepoList.append(repoName[1])
+        # print(repoName[1])
+        
     
     return filteredRepoList
-
 
 # def getOrgList():
 #     rawRepoList = pd.read_csv(r'../data/input/repos.csv')
