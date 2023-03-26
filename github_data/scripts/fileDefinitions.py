@@ -20,3 +20,6 @@ reposFile = "../data/input/repos.csv"
 
 
 helperFile = "../data/helper.json"
+
+
+connectLogFile = "../data/logs/connectLogs.json"

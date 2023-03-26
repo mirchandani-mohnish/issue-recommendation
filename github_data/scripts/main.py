@@ -15,7 +15,7 @@ import requests
 import networkx as nx
 import matplotlib.pyplot as plt
 import generateGraph
-
+import fileDefinitions as fd
 
 headers = {"Authorization": "Bearer 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"}
 
@@ -40,17 +40,19 @@ def fetchIssueUsersPulls():
 # generateGraph.connectUserIssues("../data/raw/pulls.json")
 
 
-# making graph and connecting user nodes and issue nodes 
-g = generateGraph.loadGraphGml("../graphs/graph_v1.gml")
-print(g)
-helper_methods.logData("Graph: " + str(g))
-g = generateGraph.connectUsers(g)
-generateGraph.saveGraph(g,"../graphs/partConnGraph")
-helper_methods.logData("Graph: " + str(g))
-# g = generateGraph.connectIssues(g)
+# # making graph and connecting user nodes and issue nodes 
+# g = generateGraph.loadGraphGml("../graphs/graph_v1.gml")
+# print(g)
 # helper_methods.logData("Graph: " + str(g))
-print(g)
-generateGraph.saveGraph(g, "../graphs/ConnGraph")
+# g = generateGraph.connectUsers(g)
+# generateGraph.saveGraph(g,"../graphs/partConnGraph")
+# helper_methods.logData("Graph: " + str(g))
+# # g = generateGraph.connectIssues(g)
+# # helper_methods.logData("Graph: " + str(g))
+# print(g)
+# generateGraph.saveGraph(g, "../graphs/ConnGraph")
 
 # generateGraph.connectIssues(g)
+
+
 

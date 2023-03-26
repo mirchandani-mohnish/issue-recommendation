@@ -17,8 +17,12 @@ import matplotlib.pyplot as plt
 import ijson
 import os
 from networkx import bipartite
+import fileDefinitions as fd
+from dotenv import load_dotenv
 
-headers = {"Authorization": "Bearer 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"}
+load_dotenv()
+headers = {"Authorization": "Bearer " + os.getenv('ACCESS_TOKEN')}
+
 path = "/github_data/graphs"
 
 
@@ -107,6 +111,24 @@ def saveGraph(gph, fileName):
     nx.write_edgelist(gph,str(fileName + ".txt"))
     helper_methods.logData("Done saving graph")
     
+
+def updateConnectLogs(repoName: str,pullCount: int,userData: str,issueData: str):
+    connectLogData = {
+        "lastRepo": repoName,
+        "pullCount": pullCount,
+        "lastUser": userData,
+        "lastIssue": issueData
+    }
+
+    with open(fd.connectLogFile, "w") as file:
+        file.write(json.dumps(connectLogData, indent=4))
+    
+    return True
+
+
+
+
+
 '''
 connectUserIssues(fileName)
 params: 
@@ -122,49 +144,80 @@ params:
 
 '''
 
-def connectUserIssues(fileName):
-    g = nx.Graph()
+
+def connectUserIssues(fileName: str):
+    try:
+        g = loadGraphGexf(fileName)
+        helper_methods.logData("graph file found at " + str(fileName))
+    except Exception as e:
+        helper_methods.logData(e)
+        g = nx.Graph()
+        helper_methods.logData("new graph file generated")
+    
+    helper_methods.logData("------Current Graph -------")
+    helper_methods.logData(g)
+
+    with open(fd.connectLogFile, "r") as file:
+        lastPullData = json.load(file)
+    
+
     helper_methods.logData("connecting users and issues")
     count = 0
-    with open(fileName, "rb") as f:
+    lastPullCount = int(lastPullData['pullCount'])
+    updatedLastPullCount = lastPullCount
+    with open(fd.pullsFile, "rb") as f:
         for record in ijson.items(f, "item"): # open the file -> use ijson to fetch a record instead of a line
-            user = record["head"]["user"] # take the user from the record 
-            user_formatted = json.dumps(user, indent = 4)
-            issueUrl = record["issue_url"] # take the issue url from the record 
-            linkedIssueData = requests.get(str(issueUrl), headers=headers) # request github api for issue data 
-            userNodeData = filterUser(user) # filter out useless content from the user 
-            issueNodeData = filterIssue(linkedIssueData.json()) # filter out useless content from issue
-            issueNodeId = linkedIssueData.json()["node_id"] # make a node id -> issue node id is the node_id provided by github
-            # print(linkedIssueData.json())
-            userNodeId = userNodeData["login"] # user node id is the login id
-            try:
-                g.add_node(userNodeId,attr=userNodeData, bipartite = 0) # create the first node of bipartite graph 
-                g.add_node(issueNodeId, attr=issueNodeData, bipartite = 1) # issue node of graph
-                g.add_edge(userNodeId, issueNodeId) # connect both the nodes
-                helper_methods.logData("Connection made:" + userNodeId + " --- "+ issueNodeId )
-            except:
-                helper_methods.logData("Connection rejected")
-                pass
-            # helper_methods.logData("Creating Node between" + json.tostring(user) + "and " json.tostring(issueUrl))
-            count += 1
-            print(count)
-            if count >= 20:
+            if(lastPullCount != 0):
+                lastPullCount -= 1
+                helper_methods.logData("Retreiving predone content: count -> " + str(lastPullCount))
+            else:
                 try:
-                    nx.write_gml(g,"../graphs/graph.gml")
-                    count = 0
-                except:
-                    print("unable to write")
-                    pass
+                    user = record["head"]["user"] # take the user from the record 
+                    user_formatted = json.dumps(user, indent = 4)
+                    issueUrl = record["issue_url"] # take the issue url from the record 
+                    linkedIssueData = requests.get(str(issueUrl), headers=headers) # request github api for issue data 
+                    userNodeData = filterUser(user) # filter out useless content from the user 
+                    issueNodeData = filterIssue(linkedIssueData.json()) # filter out useless content from issue
+                    # issueNodeId = linkedIssueData.json()["node_id"] # make a node id -> issue node id is the node_id provided by github
+                    issueNodeId = issueUrl.split("https://api.github.com/repos/")[1]
+                    
+                    # print(linkedIssueData.json())
+                    userNodeId = userNodeData["login"] # user node id is the login id
+                    try:
+                        if(g.has_node(userNodeId) == False):
+                            g.add_node(userNodeId,attr=userNodeData, bipartite = 0) # create the first node of bipartite graph 
+                        if(g.has_node(issueNodeId) == False):
+                            g.add_node(issueNodeId, attr=issueNodeData, bipartite = 1) # issue node of graph
+                        if(g.has_edge(userNodeId, issueNodeId) == False):    
+                            g.add_edge(userNodeId, issueNodeId) # connect both the nodes
+                        helper_methods.logData("Connection made:" + userNodeId + " --- "+ issueNodeId )
+                    except:
+                        helper_methods.logData("Connection rejected")
+                        pass
+                    # helper_methods.logData("Creating Node between" + json.tostring(user) + "and " json.tostring(issueUrl))
 
-                try:
-                    nx.write_gexf(g,"../graphs/graph.gexf")
-                    count = 0
-                except:
-                    print("unable to write")
+                    count += 1
+                    updatedLastPullCount += 1
+                    updateConnectLogs(userNodeId, updatedLastPullCount, userNodeId, issueNodeId)
+                    helper_methods.logData("UpdatedLastPullCount: " + str(updatedLastPullCount))
+                    print("count:" + str(count))
+
+                    if count >= 20:
+                        try:
+                            saveGraph(g,fileName)
+                            count = 0
+                        except Exception as e:
+                            nx.write_gexf(g, str(fileName))
+                            count = 0
+                            helper_methods.logData("Graph written as Gexf")
+                    # time.sleep(1)
+                    time.sleep(0.2)
+                except Exception as e:
+                    helper_methods.logData(e)
+                    updatedLastPullCount += 1
+                    time.sleep(5)
                     pass
-            # time.sleep(1)
-            time.sleep(0.2)
-            print(g)
+            
     return g
 
 '''
@@ -318,11 +371,71 @@ def connectIssues(gph):
 
 
 
-'''
-generateMetrics(gph)
-params: gph -> graph
 
--> we generate all the metrics related to the graph and store the samein the metrics folder in data
+
+
+
+
+
+
+'''
+    generateMetrics(gph)
+    params: gph -> graph
+
+    -> we generate all the metrics related to the graph and store the samein the metrics folder in data
+
+'''
+
+def generateMetrics(gph):
+    graphData = {
+        "Nodes" : gph.number_of_nodes,
+        "Edges" : gph.number_of_edges
+    }
+
+    with open(fd.metricLogs.json, "w") as file:
+        json.dumps(graphData, indent=4)
+    return graphData
+
+
+
+'''
+def generateGraph(dataFile, graphFile):
+
+- connect and genrate the full graph based on file name and store the graph
+
+
+'''
+
+
+def generateGraph(dataFile, graphFile):
+    helper_methods.logData("Generating Graph")
+    
+    try:
+        gph = loadGraphGexf(graphFile)
+    except Exception as e:
+        helper_methods.logData("No graph file found")
+        gph = nx.Graph()
+    
+    
+    gph = connectUserIssues(graphFile) # generates nodes and edges as well
+    gph = connectIssues(gph)
+    gph = connectUsers(gph)
+
+
+    graphMetrics = generateMetrics(gph, "metrics")
+    saveGraph(gph, "fullyConnectedGraph")
+    helper_methods.logData("-- Graph Generated --")
+    helper_methods.logData("Nodes: " + str(gph.number_of_nodes()))
+    helper_methods.logData("Edges: " + str(gph.number_of_edges()))
+    helper_methods.logData("-----------------------Compilation Terminating---------------------")
+
+    return gph
+
+
+
+generateGraph(fd.pullsFile,"../graphs/finalGraph.gexf")
+
+
 
 '''
 
@@ -363,3 +476,4 @@ params: gph -> graph
             # helper_methods.logData("edges made for node" + n[0])   
         
         # time.sleep(1)
+'''
