@@ -16,11 +16,11 @@ def seekHeaders():
 def replace_brackets_with_comma(file_path):
     with open(file_path, 'r+') as file:
         content = file.read()
-        updated_content = content.replace("][", ",")
+        updated_content = content.replace(",,", ",")
         file.seek(0)
         file.write(updated_content)
         file.truncate()
-
+    print("done")
 
 
 def getToken():

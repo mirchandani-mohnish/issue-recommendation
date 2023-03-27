@@ -55,4 +55,5 @@ def fetchIssueUsersPulls():
 # generateGraph.connectIssues(g)
 
 
-
+gph = generateGraph.loadGraphGexf("./ucongraph.gexf")
+generateGraph.connectUsers(gph)
