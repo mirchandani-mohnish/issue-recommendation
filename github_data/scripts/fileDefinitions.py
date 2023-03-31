@@ -23,3 +23,9 @@ helperFile = "../data/helper.json"
 
 
 connectLogFile = "../data/logs/connectLogs.json"
+
+userToIssueConnFile = "../graphs/connGraph2.gexf"
+
+userToIssueConnFileMinor = "../graphs/graph.gexf"
+
+userToUserConnFile = "../graphs/connGraph3.gexf"

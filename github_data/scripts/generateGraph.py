@@ -158,7 +158,7 @@ def connectUserIssues(fileName: str):
     helper_methods.logData(g)
 
     with open(fd.connectLogFile, "r") as file:
-        lastPullData = json.load(file)
+        lastNodeData = json.load(file)
     
 
     helper_methods.logData("connecting users and issues")
@@ -242,12 +242,27 @@ params: gph -> graph
 
 
 '''
-def connectUsers(gph):
+def connectUsers(filename: str):
     # helper_methods.logData("---------Connecting Users---------")
     userToRepo = {}
     temp_dic = {}
     count = 20
-    g = gph
+    while(True):
+        try:
+            gph = loadGraphGexf(filename)
+            helper_methods.logData("graph file found at " + str(filename))
+            break
+        except Exception as e:
+            helper_methods.logData(e)
+            # g = nx.Graph()
+            helper_methods.logData("unable to load file")
+            time.sleep(1)
+            helper_methods.logData("reattempting")
+        
+    # with open(fd.connectLogFile, "r") as file:
+    #     lastNodeData = json.load(file)
+
+
     for n in gph.nodes(data=True):
         if n[1]['bipartite'] == 0:
             starredUrl = n[1]['attr']
@@ -256,13 +271,12 @@ def connectUsers(gph):
             if(starredUrl  == "starred_url"):
                 pass
             else:
-                # helper_methods.logData("currently at: " + n[0]) #logging
-                print("currently at: " + n[0])
+                helper_methods.logData("currently at: " + n[0]) #logging
                 listOfStarredRepos = requests.get(starredUrl, headers = headers)
                 listOfStarredRepos = listOfStarredRepos.json()
-                # helper_methods.logData("fetched starred repos" + starredUrl) #logging
+                helper_methods.logData("fetched starred repos" + starredUrl) #logging
                 print("fetched starred repos" + starredUrl)
-                time.sleep(0.2)
+                time.sleep(0.1)
                 for repo in listOfStarredRepos:
                     try:
                         tem = repo['name']
@@ -273,7 +287,7 @@ def connectUsers(gph):
                             else:
                                 ans = ans + i
                     except Exception as e:
-                        # helper_methods.logData("Error" + str(e))
+                        helper_methods.logData("Error" + str(e))
                         pass
                     # print(ans)
                     if ((ans in temp_dic) and (str(n[0]) not in temp_dic[ans])):
@@ -282,11 +296,7 @@ def connectUsers(gph):
                         # print(ans, ans in temp_dic)
                         temp_dic[ans] = [str(n[0]),]
                     print(tem)
-                    time.sleep(0.05)
-                # helper_methods.logData("Created Dictionary")
-                print("created dictionary")
-               
-        time.sleep(0.2)
+                helper_methods.logData("Created Dictionary")
     
     # print(temp_dic)
     for i in temp_dic.keys():
@@ -294,26 +304,26 @@ def connectUsers(gph):
         sz = len(arr)
         for j in range(0, sz):
             for k in range(j + 1, sz):
-                g.add_edge(arr[j], arr[k])
+                gph.add_edge(arr[j], arr[k])
         try:
-            saveGraph(g, "userConnGraph")
+            saveGraph(gph, "userConnGraph")
         except:
             try:
-                nx.write_gml(g,"../graphs/userConnGraph.gml")
+                nx.write_gml(gph,str(filename))
                 count = 0
             except:
                 print("unable to write gml")
                 pass
 
             try:
-                nx.write_gexf(g,"../graphs/userConnGraph.gexf")
+                nx.write_gexf(gph,filename)
                 count = 0
             except:
                 print("unable to write gexf")
                 pass
+        time.sleep(0.2)
 
-
-    return g
+    return gph
 
 
 '''
@@ -434,9 +444,9 @@ def generateGraph(dataFile, graphFile):
         gph = nx.Graph()
     
     
-    gph = connectUserIssues(graphFile) # generates nodes and edges as well
-    gph = connectIssues(gph)
-    gph = connectUsers(gph)
+    # gph = connectUserIssues(graphFile) # generates nodes and edges as well
+    # gph = connectIssues(gph)
+    # gph = connectUsers(gph)
 
 
     graphMetrics = generateMetrics(gph, "metrics")
@@ -452,7 +462,7 @@ def generateGraph(dataFile, graphFile):
 
 # generateGraph(fd.pullsFile,"../graphs/finalGraph.gexf")
 
-
+gph = connectUsers(fd.userToIssueConnFileMinor)
 
 '''
 
