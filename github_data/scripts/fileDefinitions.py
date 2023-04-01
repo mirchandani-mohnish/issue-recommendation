@@ -29,3 +29,9 @@ userToIssueConnFile = "../graphs/connGraph2.gexf"
 userToIssueConnFileMinor = "../graphs/graph.gexf"
 
 userToUserConnFile = "../graphs/connGraph3.gexf"
+
+issueLogFile = "../data/logs/dataLogs.json"
+
+issueToLangFile = "../data/misc/issuesToLang.json"
+
+fullyConnGraphFile = "../graphs/fullyConnGraph.gexf"

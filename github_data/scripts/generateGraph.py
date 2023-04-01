@@ -158,7 +158,7 @@ def connectUserIssues(fileName: str):
     helper_methods.logData(g)
 
     with open(fd.connectLogFile, "r") as file:
-        lastNodeData = json.load(file)
+        lastPullData = json.load(file)
     
 
     helper_methods.logData("connecting users and issues")
@@ -229,6 +229,15 @@ def getStarredUrlData(starredUrl: str):
     starredUrl = json.loads(starredUrl)
     
     return starredUrl['starred_url']
+
+
+
+def getParentRepoUrlData(parentRepoUrl):
+    parentRepoUrl = parentRepoUrl.replace("'", '"')
+    
+    parentRepoUrl = json.loads(parentRepoUrl)
+    
+    return parentRepoUrl['repository_url']
 
 '''
 connectUsers(gph)
@@ -400,6 +409,54 @@ def connectIssues(gph):
 
 
 
+def connectIssueToIssue(filename):
+    helper_methods.logData("Connectig Issues ")
+    lastIssue = {}
+    try:
+        with open(fd.issueLogFile, "r") as file:
+            lastIssue = json.load(file.read())
+    except Exception as e:
+        helper_methods.logData(e)
+    
+    try:
+        with open(fd.issueToLangFile, "r") as file:
+            issueToLang = json.dump(file.read())
+    except Exception as e:
+        helper_methods.logData(e)
+        issueToLang = {}
+        
+    try:
+         with open(filename, "r") as file:
+             gph = loadGraphGexf(filename)  
+    except:
+        helper_methods.logData("Unable to open graph")
+    
+    
+    for n in gph.nodes(data=True):
+            if n[1]['bipartite'] == 1:
+                try:
+                    parentRepoUrl = n[1]['attr']
+                    parentRepoUrl = getParentRepoUrlData(parentRepoUrl)
+                    parentRepoUrl = parentRepoUrl.strip("{/owner}{/repo}")
+                except Exception as e:
+                    helper_methods.logData("Error in reading parent url")
+                    helper_methods.logData(e)
+                    continue
+                # try:
+                helper_methods.logData("connecting Issues: " + n[0])
+                listOfLanguagesUrl = str(parentRepoUrl + "/languages")
+                listOfLanguages = requests.get(listOfLanguagesUrl, headers=headers).json()
+                for item in listOfLanguages:
+                    lang = item[0]
+                    if lang != None and lang in issueToLang:
+                        issueToLang[lang].append(str(n[0]))
+                        for issueNode in issueToLang[lang]:
+                            gph.add_edge(issueNode,str(n[0]))
+                    else:
+                        issueToLang[lang] = [str(n[0]),]
+                    print(n[0])
+                saveGraph(gph, "./fullyConnGraph")
+    return gph
 
 
 
@@ -460,9 +517,11 @@ def generateGraph(dataFile, graphFile):
 
 
 
+connectIssueToIssue(fd.fullyConnGraphFile)
+
 # generateGraph(fd.pullsFile,"../graphs/finalGraph.gexf")
 
-gph = connectUsers(fd.userToIssueConnFileMinor)
+# gph = connectUsers(fd.userToIssueConnFileMinor)
 
 '''
 

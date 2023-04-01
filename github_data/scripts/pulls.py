@@ -108,4 +108,3 @@ def fetchPullData():
         # print(repo)
         time.sleep(0.2)
 
-fetchPullData()
