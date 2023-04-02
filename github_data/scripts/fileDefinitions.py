@@ -34,4 +34,4 @@ issueLogFile = "../data/logs/dataLogs.json"
 
 issueToLangFile = "../data/misc/issuesToLang.json"
 
-fullyConnGraphFile = "../graphs/fullyConnGraph.gexf"
+fullyConnGraphFile = "../graphs/current/fullyConnGraph.gexf"
