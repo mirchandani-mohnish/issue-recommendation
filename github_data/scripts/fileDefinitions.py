@@ -35,3 +35,6 @@ issueLogFile = "../data/logs/dataLogs.json"
 issueToLangFile = "../data/misc/issuesToLang.json"
 
 fullyConnGraphFile = "../graphs/current/fullyConnGraph.gexf"
+
+
+jaccordPredictionFile = "../data/predictions/jaccord.json"
