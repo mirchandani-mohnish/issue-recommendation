@@ -255,7 +255,8 @@ def connectUsers(filename: str):
     # helper_methods.logData("---------Connecting Users---------")
     userToRepo = {}
     temp_dic = {}
-    count = 20
+    count = 0
+    
     while(True):
         try:
             gph = loadGraphGexf(filename)
@@ -267,70 +268,98 @@ def connectUsers(filename: str):
             helper_methods.logData("unable to load file")
             time.sleep(1)
             helper_methods.logData("reattempting")
-        
+    print(gph)
+    try:
+        with open(fd.connectLogFile, "r") as file:
+            prevNodeDetails = json.load(file)
+    except Exception as e:
+        helper_methods.logData("Unable to pass previous connection file")
+        prevNodeDetails = {
+            "nodeName" : "NA",
+            "nodeNumber" : 0
+        }
+        helper_methods.logData(e)
+        pass
     # with open(fd.connectLogFile, "r") as file:
     #     lastNodeData = json.load(file)
-
-
-    for n in gph.nodes(data=True):
-        if n[1]['bipartite'] == 0:
-            starredUrl = n[1]['attr']
-            starredUrl = getStarredUrlData(starredUrl)
-            starredUrl = starredUrl.strip("{/owner}{/repo}")
-            if(starredUrl  == "starred_url"):
-                pass
-            else:
-                helper_methods.logData("currently at: " + n[0]) #logging
-                listOfStarredRepos = requests.get(starredUrl, headers = headers)
-                listOfStarredRepos = listOfStarredRepos.json()
-                helper_methods.logData("fetched starred repos" + starredUrl) #logging
-                print("fetched starred repos" + starredUrl)
-                time.sleep(0.1)
-                for repo in listOfStarredRepos:
-                    try:
-                        tem = repo['name']
-                        ans = ""
-                        for i in tem:
-                            if i == '-':
-                                ans = ans + '_'
-                            else:
-                                ans = ans + i
-                    except Exception as e:
-                        helper_methods.logData("Error" + str(e))
-                        pass
-                    # print(ans)
-                    if ((ans in temp_dic) and (str(n[0]) not in temp_dic[ans])):
-                        temp_dic[ans].append(str(n[0]))
-                    else:
-                        # print(ans, ans in temp_dic)
-                        temp_dic[ans] = [str(n[0]),]
-                    print(tem)
-                helper_methods.logData("Created Dictionary")
+    print(prevNodeDetails)
+    repoCount = int(prevNodeDetails['nodeNumber'])
+    print(repoCount)
     
-    # print(temp_dic)
-    for i in temp_dic.keys():
-        arr = temp_dic[i]
-        sz = len(arr)
-        for j in range(0, sz):
-            for k in range(j + 1, sz):
-                gph.add_edge(arr[j], arr[k])
-        try:
-            saveGraph(gph, "userConnGraph")
-        except:
-            try:
-                nx.write_gml(gph,str(filename))
-                count = 0
-            except:
-                print("unable to write gml")
-                pass
+    for n in gph.nodes(data=True):
+        if(repoCount == 0):    
+            if n[1]['bipartite'] == 0:
+                starredUrl = n[1]['attr']
+                starredUrl = getStarredUrlData(starredUrl)
+                starredUrl = starredUrl.strip("{/owner}{/repo}")
+                if(starredUrl  == "starred_url"):
+                    pass
+                else:
+                    helper_methods.logData("currently at: " + n[0]) #logging
+                    listOfStarredRepos = requests.get(starredUrl, headers = headers)
+                    listOfStarredRepos = listOfStarredRepos.json()
+                    helper_methods.logData("fetched starred repos" + starredUrl) #logging
+                    print("fetched starred repos" + starredUrl)
+                    time.sleep(0.1)
+                    for repo in listOfStarredRepos:
+                        try:
+                            tem = repo['name']
+                            correctedRepoName = ""
+                            for i in tem:
+                                if i == '-':
+                                    correctedRepoName = correctedRepoName + '_'
+                                else:
+                                    correctedRepoName = correctedRepoName + i
+                        except Exception as e:
+                            helper_methods.logData("Error" + str(e))
+                            pass
+                        # print(ans)
+                        if ((correctedRepoName in temp_dic) and (str(n[0]) not in temp_dic[correctedRepoName])):
+                            for userName in temp_dic[correctedRepoName]:
+                                gph.add_edge(userName,str(n[0]), label=correctedRepoName)
+                                count += 1
+                            temp_dic[correctedRepoName].append(str(n[0]))
+                        else:
+                            # print(ans, ans in temp_dic)
+                            temp_dic[correctedRepoName] = [str(n[0]),]
+                        print(tem)
+                    helper_methods.logData("Created Dictionary")
+                    saveGraph(gph,fd.finalConnectedGraphFile)
+                    helper_methods.logData("A few users connected : - " + str(count) + "  Edges added")
+                    prevNodeDetails = {
+                        "nodeName" : str(n[0]),
+                        "nodeNumber" : int(count)
+                    }
+                    with open(fd.connectLogFile, "w") as file:
+                        file.write(json.dumps(prevNodeDetails))
+        else:
+            repoCount -= 1
+            print("Currently at: " + str(repoCount))      
+    
+    # # print(temp_dic)
+    # for i in temp_dic.keys():
+    #     arr = temp_dic[i]
+    #     sz = len(arr)
+    #     for j in range(0, sz):
+    #         for k in range(j + 1, sz):
+    #             gph.add_edge(arr[j], arr[k])
+    #     try:
+    #         saveGraph(gph, "userConnGraph")
+    #     except:
+    #         try:
+    #             nx.write_gml(gph,str(filename))
+    #             count = 0
+    #         except:
+    #             print("unable to write gml")
+    #             pass
 
-            try:
-                nx.write_gexf(gph,filename)
-                count = 0
-            except:
-                print("unable to write gexf")
-                pass
-        time.sleep(0.2)
+    #         try:
+    #             nx.write_gexf(gph,filename)
+    #             count = 0
+    #         except:
+    #             print("unable to write gexf")
+    #             pass
+    #     time.sleep(0.2)
 
     return gph
 
@@ -516,9 +545,7 @@ def generateGraph(dataFile, graphFile):
     return gph
 
 
-
-connectIssueToIssue(fd.fullyConnGraphFile)
-
+connectUsers(fd.userToIssueConnFileMinor)
 # generateGraph(fd.pullsFile,"../graphs/finalGraph.gexf")
 
 # gph = connectUsers(fd.userToIssueConnFileMinor)

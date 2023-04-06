@@ -26,7 +26,7 @@ connectLogFile = "../data/logs/connectLogs.json"
 
 userToIssueConnFile = "../graphs/connGraph2.gexf"
 
-userToIssueConnFileMinor = "../graphs/graph.gexf"
+userToIssueConnFileMinor = "../graphs/prev/graph.gexf"
 
 userToUserConnFile = "../graphs/connGraph3.gexf"
 
@@ -38,3 +38,5 @@ fullyConnGraphFile = "../graphs/current/fullyConnGraph.gexf"
 
 
 jaccordPredictionFile = "../data/predictions/jaccord.json"
+
+finalConnectedGraphFile = "../graphs/final/finalConnectedGraph"
