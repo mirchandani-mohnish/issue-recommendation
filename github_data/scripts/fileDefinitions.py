@@ -39,4 +39,4 @@ fullyConnGraphFile = "../graphs/current/fullyConnGraph.gexf"
 
 jaccordPredictionFile = "../data/predictions/jaccord.json"
 
-finalConnectedGraphFile = "../graphs/final/finalConnectedGraph"
+finalConnectedGraphFile = "../graphs/final/finalConnectedGraph.gexf"

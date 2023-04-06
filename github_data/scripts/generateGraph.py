@@ -443,25 +443,37 @@ def connectIssueToIssue(filename):
     lastIssue = {}
     try:
         with open(fd.issueLogFile, "r") as file:
-            lastIssue = json.load(file.read())
+            lastIssue = json.load(file)
     except Exception as e:
         helper_methods.logData(e)
+        lastIssue = {
+            "issueId": "",
+            "issueNumber": 0
+        }
     
     try:
         with open(fd.issueToLangFile, "r") as file:
-            issueToLang = json.dump(file.read())
+            issueToLang = json.load(file)
     except Exception as e:
         helper_methods.logData(e)
         issueToLang = {}
         
     try:
-         with open(filename, "r") as file:
-             gph = loadGraphGexf(filename)  
+        #  with open(filename, "r") as file:
+        gph = loadGraphGexf(filename)  
+        helper_methods.logData("Graph Loaded")
+        helper_methods.logData(gph)
     except:
         helper_methods.logData("Unable to open graph")
+        gph = nx.Graph()
     
-    
+    currentIssueCount = int(lastIssue['issueNumber'])
+    lastIssueSeen = currentIssueCount
     for n in gph.nodes(data=True):
+        if(lastIssueSeen > 0):
+            print("Skipping as already attended" + str(n[0]))
+            lastIssueSeen -= 1
+        else:
             if n[1]['bipartite'] == 1:
                 try:
                     parentRepoUrl = n[1]['attr']
@@ -473,18 +485,50 @@ def connectIssueToIssue(filename):
                     continue
                 # try:
                 helper_methods.logData("connecting Issues: " + n[0])
-                listOfLanguagesUrl = str(parentRepoUrl + "/languages")
-                listOfLanguages = requests.get(listOfLanguagesUrl, headers=headers).json()
+                try:
+                    listOfLanguagesUrl = str(parentRepoUrl + "/languages")
+                    listOfLanguages = requests.get(listOfLanguagesUrl, headers=headers).json()
+                except Exception as e:
+                    helper_methods.logData("Some error in fetching files")
+                    time.sleep(10)
+                    continue
+                    
+                maxConn = 3
                 for item in listOfLanguages:
                     lang = item[0]
                     if lang != None and lang in issueToLang:
-                        issueToLang[lang].append(str(n[0]))
                         for issueNode in issueToLang[lang]:
-                            gph.add_edge(issueNode,str(n[0]))
+                            gph.add_edge(issueNode,str(n[0]), label=str(item))
+                            maxConn -= 1
+                            if (maxConn <= 0):
+                                break
+                        issueToLang[lang].append(str(n[0]))
                     else:
                         issueToLang[lang] = [str(n[0]),]
-                    print(n[0])
-                saveGraph(gph, "./fullyConnGraph")
+                filename = str(filename.split(".gexf")[0])
+                saveGraph(gph, filename)
+            currentIssueCount += 1
+            lastIssue = {
+                "issueNumber" : int(currentIssueCount),
+                "issueId" : str(n[0])
+            }
+            
+            
+            try:
+                with open(fd.issueLogFile, "w") as file:
+                    file.write(json.dumps(issueToLang))
+            except Exception as e:
+                helper_methods.logData(e)
+                pass
+            
+            try:
+                with open(fd.issueToLangFile, "w") as file:
+                    file.write(json.dumps(issueToLang))
+            except Exception as e:
+                helper_methods.logData(e)
+                helper_methods.logData("Unable to save logs")
+                
+                
     return gph
 
 
@@ -545,7 +589,8 @@ def generateGraph(dataFile, graphFile):
     return gph
 
 
-connectUsers(fd.userToIssueConnFileMinor)
+# connectUsers(fd.userToIssueConnFileMinor)
+connectIssueToIssue(fd.finalConnectedGraphFile)
 # generateGraph(fd.pullsFile,"../graphs/finalGraph.gexf")
 
 # gph = connectUsers(fd.userToIssueConnFileMinor)

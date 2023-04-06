@@ -38,3 +38,7 @@ AU2040241 - Priyanshu Pathak
 - Around 2500 repositories used.
 
 ### Nodes
+
+### Errors Faced
+
+- Too many edges in graph when connecting issues causing minor values of prediction
