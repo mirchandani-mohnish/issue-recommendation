@@ -222,13 +222,13 @@ def connectUserIssues(fileName: str):
 
 
 
-def getStarredUrlData(starredUrl: str):
+def getReposUrlData(reposUrl: str):
     
-    starredUrl = starredUrl.replace("'", '"')
+    reposUrl = reposUrl.replace("'", '"')
     
-    starredUrl = json.loads(starredUrl)
+    reposUrl = json.loads(starredUrl)
     
-    return starredUrl['starred_url']
+    return reposUrl['repos_url']
 
 
 
@@ -362,6 +362,115 @@ def connectUsers(filename: str):
     #     time.sleep(0.2)
 
     return gph
+
+
+
+
+
+
+
+def connectUsersUsingContrib(filename: str):
+    # helper_methods.logData("---------Connecting Users---------")
+    userToRepo = {}
+    temp_dic = {}
+    count = 0
+    nodeCount = 0
+    
+    while(True):
+        try:
+            gph = loadGraphGexf(filename)
+            helper_methods.logData("graph file found at " + str(filename))
+            break
+        except Exception as e:
+            helper_methods.logData(e)
+            # g = nx.Graph()
+            helper_methods.logData("unable to load file")
+            time.sleep(1)
+            helper_methods.logData("reattempting")
+    print(gph)
+    try:
+        with open(fd.connectLogFile, "r") as file:
+            prevNodeDetails = json.load(file)
+    except Exception as e:
+        helper_methods.logData("Unable to pass previous connection file")
+        prevNodeDetails = {
+            "nodeName" : "NA",
+            "nodeNumber" : 0
+        }
+        helper_methods.logData(e)
+        pass
+    print(prevNodeDetails)
+    repoCount = int(prevNodeDetails['nodeNumber'])
+    nodeCount = repoCount
+    for n in gph.nodes(data=True):
+        if(repoCount == 0):
+            nodeCount += 1 
+            if n[1]['bipartite'] == 0:
+                contribUrl = str("https://api.github.com/users/" + str(n[0]) + "/repos")
+                if(contribUrl  == "login"):
+                    pass
+                else:
+                    try:
+                        helper_methods.logData("currently at: " + n[0]) #logging 
+                        try:
+                            listOfContribRepos = requests.get(contribUrl, headers = headers)
+                            listOfContribRepos = listOfContribRepos.json()
+                            helper_methods.logData("fetched starred repos" + contribUrl) #logging
+                            time.sleep(0.1)
+                        except Exception as e:
+                            helper_methods.logData(e)
+                            time.sleep(5)
+                            helper_methods.logData("=> Some error with requests")
+                        for repo in listOfContribRepos:
+                            try:
+                                tem = repo['name']
+                                correctedRepoName = ""
+                                for i in tem:
+                                    if i == '-':
+                                        correctedRepoName = correctedRepoName + '_'
+                                    else:
+                                        correctedRepoName = correctedRepoName + i
+                            except Exception as e:
+                                helper_methods.logData("Error" + str(e))
+                                pass
+                            # print(ans)
+                            if ((correctedRepoName in temp_dic) and (str(n[0]) not in temp_dic[correctedRepoName])):
+                                for userName in temp_dic[correctedRepoName]:
+                                    gph.add_edge(userName,str(n[0]), label=correctedRepoName, type="contribution")
+                                    count += 1
+                                temp_dic[correctedRepoName].append(str(n[0]))
+                            else:
+                                # print(ans, ans in temp_dic)
+                                temp_dic[correctedRepoName] = [str(n[0]),]
+                            print(tem)
+                        helper_methods.logData("A few users connected : - " + str(count) + "  Edges added")
+                        prevNodeDetails = {
+                            "nodeName" : str(n[0]),
+                            "nodeNumber" : int(nodeCount)
+                        }
+                        with open(fd.connectLogFile, "w") as file:
+                            file.write(json.dumps(prevNodeDetails))
+                    except Exception as e:
+                        helper_methods.logData(e)
+                        time.sleep(5)
+                        continue
+        else:
+            repoCount -= 1
+            print("Currently at: " + str(repoCount))    
+        
+    saveGraph(gph,"../graphs/v3/contribConnected")  
+    
+
+    return gph
+
+
+
+
+
+
+
+
+
 
 
 '''
@@ -590,7 +699,8 @@ def generateGraph(dataFile, graphFile):
 
 
 # connectUsers(fd.userToIssueConnFileMinor)
-connectIssueToIssue(fd.finalConnectedGraphFile)
+# connectIssueToIssue(fd.finalConnectedGraphFile)
+connectUsersUsingContrib("../graphs/final/finalConnectedGraph.gexf")
 # generateGraph(fd.pullsFile,"../graphs/finalGraph.gexf")
 
 # gph = connectUsers(fd.userToIssueConnFileMinor)
