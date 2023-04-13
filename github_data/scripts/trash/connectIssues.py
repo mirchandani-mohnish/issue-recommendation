@@ -1,12 +1,12 @@
 
 import time
 import utils.helper_methods as helper_methods
-import users as users
-import issues as issues
+import github_data.scripts.dataCollection.users as users
+import github_data.scripts.dataCollection.issues as issues
 import datetime
 import json
 import threading
-import pulls as pulls
+import github_data.scripts.dataCollection.pulls as pulls
 import pandas as pd
 import ijson
 import requests 
@@ -15,9 +15,9 @@ import matplotlib.pyplot as plt
 import ijson
 import os
 from networkx import bipartite
-import fileDefinitions as fd
+import github_data.scripts.graphFormation.fileDefinitions as fd
 from dotenv import load_dotenv
-import generateGraph as gg
+import github_data.scripts.graphFormation.generateGraph as gg
 
 
 

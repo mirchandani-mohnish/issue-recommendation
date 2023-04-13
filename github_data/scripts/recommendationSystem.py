@@ -2,7 +2,7 @@ import networkx as nx
 from itertools import combinations
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
-import fileDefinitions as fd
+import github_data.scripts.graphFormation.fileDefinitions as fd
 import utils.helper_methods as helper_methods
 from networkx.algorithms import bipartite
 import time

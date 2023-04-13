@@ -9,7 +9,7 @@ import time
 import requests
 import utils.helper_methods as helper_methods
 import queue
-import users as users
+import github_data.scripts.dataCollection.users as users
 import sys
 sys.path.append('../')
 

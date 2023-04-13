@@ -3,12 +3,12 @@ sys.path.append('../')
 
 import time
 import utils.helper_methods as helper_methods
-# import github_data.scripts.dataCollection.users as users
-# import github_data.scripts.dataCollection.issues as issues
-# import datetime
+import github_data.scripts.dataCollection.users as users
+import github_data.scripts.dataCollection.issues as issues
+import datetime
 import json
-# import threading
-# import github_data.scripts.dataCollection.pulls as pulls
+import threading
+import github_data.scripts.dataCollection.pulls as pulls
 import pandas as pd
 import ijson
 import requests 
@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import ijson
 import os
 from networkx import bipartite
-import scripts.graphFormation.fileDefinitions as fd
+import github_data.scripts.graphFormation.fileDefinitions as fd
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -642,6 +642,28 @@ def connectIssueToIssue(filename):
 
 
 
+
+
+'''
+    generateMetrics(gph)
+    params: gph -> graph
+
+    -> we generate all the metrics related to the graph and store the samein the metrics folder in data
+
+'''
+
+def generateMetrics(gph):
+    graphData = {
+        "Nodes" : gph.number_of_nodes,
+        "Edges" : gph.number_of_edges
+    }
+
+    with open(fd.metricLogs.json, "w") as file:
+        json.dumps(graphData, indent=4)
+    return graphData
+
+
+
 '''
 def generateGraph(dataFile, graphFile):
 
@@ -666,7 +688,7 @@ def generateGraph(dataFile, graphFile):
     # gph = connectUsers(gph)
 
 
-   
+    graphMetrics = generateMetrics(gph, "metrics")
     saveGraph(gph, "fullyConnectedGraph")
     helper_methods.logData("-- Graph Generated --")
     helper_methods.logData("Nodes: " + str(gph.number_of_nodes()))
@@ -676,137 +698,10 @@ def generateGraph(dataFile, graphFile):
     return gph
 
 
-
-
-
-    
-    reposUrl = reposUrl.replace("'", '"')
-    
-    reposUrl = json.loads(starredUrl)
-    
-    return reposUrl['repos_url']
-
-def getLabels(labelUrl):
-    labelUrl = labelUrl.replace("'", '"')
-    labelUrl = json.loads(labelUrl)
-   
-    return labelUrl['labels']
-
-
-def connectIssuesUsingLabels(filename):
-    helper_methods.logData("Running Label Connections")
-    lastIssue = {}
-    try:
-        with open(fd.connectLogFile, "r") as file:
-            lastIssue = json.load(file)
-    except Exception as e:
-        helper_methods.logData(e)
-        lastIssue = {
-            "issueId": "",
-            "issueNumber": 0
-        }
-    
-    try:
-        with open(fd.dataLogFile, "r") as file:
-            issueToLabel = json.load(file)
-            
-    except Exception as e:
-        helper_methods.logData(e)
-        commonLabels = ["bug","documentation","duplicate","enhancement","help wanted","invalid","question","wontfix","discussion","epic","needs information"]
-        issueToLabel = {}
-        for lab in commonLabels:
-             issueToLabel[lab] = []
-    print(lastIssue)
-    currentIssueCount = lastIssue['issueNumber']
-    lastIssueCount = currentIssueCount
-    
-        
-    try:
-        #  with open(filename, "r") as file:
-        gph = loadGraphGexf(filename)  
-        helper_methods.logData("Graph Loaded")
-        helper_methods.logData(gph)
-    except:
-        helper_methods.logData("Unable to open graph")
-        gph = nx.Graph()
-        
-        
-    for n in gph.nodes(data=True):
-        if(lastIssueCount != 0):
-            lastIssueCount -= 1
-        else:   
-            currentIssueCount += 1     
-            if(n[1]['bipartite'] == 1):
-                try:
-                    labelsUrl = n[1]['attr']
-                    listOfLabels = getLabels(labelsUrl)
-                except Exception as e:
-                    helper_methods.logData("Error in reading parent url")
-                    helper_methods.logData(e)
-                    continue
-                # try:
-                helper_methods.logData("connecting Issues: " + n[0])
-                # try:
-                    
-                #     listOfLabels = requests.get(labelsUrl, headers=headers).json()
-                # except Exception as e:
-                #     helper_methods.logData("Some error in fetching files")
-                #     time.sleep(10)
-                #     continue
-                
-                if(listOfLabels == [] or listOfLabels == None):
-                    helper_methods.logData("No labels found for issue")
-                    continue
-                    
-                for item in listOfLabels:
-                    labelName = item[0]
-                    
-                    time.sleep(100)
-                    if labelName != None and labelName in issueToLabel:
-                        for issueNode in issueToLabel[labelName]:
-                            gph.add_edge(issueNode,str(n[0]), label=str(item))
-                        issueToLabel[labelName].append(str(n[0]))
-                    else:
-                        issueToLabel[labelName] = [str(n[0]),]
-                # filename = str(filename.split(".gexf")[0])
-                # saveGraph(gph, filename)
-            currentIssueCount += 1
-            lastIssue = {
-                "issueNumber" : int(currentIssueCount),
-                "issueId" : str(n[0])
-            }
-            
-            
-            try:
-                with open(fd.connectLogFile, "w") as file:
-                    file.write(json.dumps(lastIssue))
-            except Exception as e:
-                helper_methods.logData(e)
-                pass
-            
-            
-            
-            try:
-                with open(fd.dataLogFile, "w") as file:
-                    file.write(json.dumps(issueToLabel))
-            except Exception as e:
-                helper_methods.logData(e)
-                pass
-                
-                
-    return gph
-                
-                
-    
-        
-        
-
-
 # connectUsers(fd.userToIssueConnFileMinor)
 # connectIssueToIssue(fd.finalConnectedGraphFile)
-# connectUsersUsingContrib("../graphs/final/finalConnectedGraph.gexf")
+connectUsersUsingContrib("../graphs/final/finalConnectedGraph.gexf")
 # generateGraph(fd.pullsFile,"../graphs/finalGraph.gexf")
-connectIssuesUsingLabels("../graphs/v3/contribConnected.gexf")
 
 # gph = connectUsers(fd.userToIssueConnFileMinor)
 
