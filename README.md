@@ -1,4 +1,4 @@
-# Codetriaging: The Social Network way
+# Codetriaging: The SNAzzy Way
 
 A project by:
 
@@ -8,6 +8,16 @@ AU2040110 - Mohnish Mirchandani
 AU2040241 - Priyanshu Pathak
 
 ## Graph Definition
+
+## To run the file
+
+You will need pythone 3.6 or greater
+You need to install the following packages. (pip or conda)
+pandas
+numpy
+ijson
+matplotlib
+networkx
 
 ### Nodes
 
