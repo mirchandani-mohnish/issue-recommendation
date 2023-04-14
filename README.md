@@ -68,10 +68,14 @@ The code has majorly been tested on two graphs of similar configurations but var
 - A cumulative of 11000 Nodes and 291375 edges
 - Around 3000 users and 8000 issues
 
+You may find the graphs here: [click here](https://drive.google.com/drive/folders/1vCiqXPmAq6xHrR4emPoYy5-UomtbnUjD?usp=sharing)
+
 ### Graph 2
 
 - A cumulative of 92000 Nodes and \_\_\_\_ edges
 - Around \_**\_ users and \_\_** issues
+
+You may find the graphs here: [click here](https://drive.google.com/drive/folders/1vCiqXPmAq6xHrR4emPoYy5-UomtbnUjD?usp=sharing)
 
 ### Example Nodes and Edges
 
@@ -94,6 +98,9 @@ The code has majorly been tested on two graphs of similar configurations but var
 
 ### Errors Faced
 
--
-- Too many edges in graph when connecting issues causing minor values of prediction
-- Possibility of correlation between language not
+- Disconnected or sparsely connected nodes will not have predictions.
+- Algorithms do not take into account different users, issues, weights.
+- The accuracy is generally lower than non-network based prediction.
+- Accuracy Measurement is not guaranteeing a correct accuracy prediction.
+
+## References
