@@ -8,6 +8,7 @@ sys.path.append('../')
 
 
 
+
 def seekHeaders():
     print("Seeking Headers")
 
@@ -103,7 +104,7 @@ def logCurrentRepo(repo, repoCount):
     
     
 def logData(logVal):
-    with open("../data/logs/logs.json", "a") as outfile:
+    with open("../../data/logs/logs.json", "a") as outfile:
         outfile.write(str(logVal))
         outfile.write("\n")
     print(logVal)

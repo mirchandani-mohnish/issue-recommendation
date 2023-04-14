@@ -30,7 +30,7 @@ You may run the files respectively in order to generate predictions. Additionall
 The Following algorithms were implemented in the project:
 
 - Adamic Adar
-- Jaccord Coefficient
+- Jaccard Coefficient
 - Preferential Attachment
 - Resource Allocation
 - Weighted Projection Algorithm
