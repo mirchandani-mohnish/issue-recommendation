@@ -16,6 +16,7 @@ A project by:
 - networkx == 3.0
 - matplotlib == 3.6.3
 - numpy == 1.23.5
+- python pickle
 
 Additionally, an extension in VScode for running ipynb files is recommended.
 
@@ -34,7 +35,7 @@ The Following algorithms were implemented in the project:
 - Preferential Attachment
 - Resource Allocation
 - Weighted Projection Algorithm
-- Prognostic Techniques for Graph-Based Link Prediction ( Self-Developed Algorithm )
+- GLHub ( Self-Developed Algorithm )
 
 Each of the files are isolated ipynb files which can be run and tested.
 
@@ -54,7 +55,11 @@ A considerable amount of time went in data collection specifically because of fi
 
 The code has majorly been tested on two graphs of similar configurations but varying scales. The configuration of our graphs is as follows:
 
-**Nodes (types)**: User, Issue
+**Nodes (types)**:
+
+- User
+- Issue
+
 **Edges**:
 
 - User --- User -> Commonly Contributed Repositories
