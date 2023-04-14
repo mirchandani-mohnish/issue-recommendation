@@ -49,7 +49,6 @@ A considerable amount of time went in data collection specifically because of fi
 - A set of Pull Requests
 - The Languages of each issue
 - The Contributions of Each User
-- The
 
 ## Graphs
 
@@ -72,8 +71,8 @@ You may find the graphs here: [click here](https://drive.google.com/drive/folder
 
 ### Graph 2
 
-- A cumulative of 92000 Nodes and \_\_\_\_ edges
-- Around \_**\_ users and \_\_** issues
+- A cumulative of 97375 Nodes and 482442 edges
+- Around 29460 users and 67935 issues
 
 You may find the graphs here: [click here](https://drive.google.com/drive/folders/1vCiqXPmAq6xHrR4emPoYy5-UomtbnUjD?usp=sharing)
 
@@ -102,5 +101,3 @@ You may find the graphs here: [click here](https://drive.google.com/drive/folder
 - Algorithms do not take into account different users, issues, weights.
 - The accuracy is generally lower than non-network based prediction.
 - Accuracy Measurement is not guaranteeing a correct accuracy prediction.
-
-## References
