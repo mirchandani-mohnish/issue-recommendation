@@ -221,12 +221,20 @@ def connectUserIssues(fileName: str):
 
 
 
+def getStarredUrlData(starredUrl: str):
+    
+    starredUrl = starredUrl.replace("'", '"')
+    
+    starredUrl = json.loads(starredUrl)
+    
+    return starredUrl['repos_url']
+
 
 def getReposUrlData(reposUrl: str):
     
     reposUrl = reposUrl.replace("'", '"')
     
-    reposUrl = json.loads(starredUrl)
+    reposUrl = json.loads(reposUrl)
     
     return reposUrl['repos_url']
 
